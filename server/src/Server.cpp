@@ -102,7 +102,11 @@ void Server::frame()
 {
     const float speed = 5;
     const float deltaTime = 1.f/60.f;
+    std::cout << "----------------------------------" << std::endl;
+    std::cout << "size: " << this->players.size() << std::endl;
     for (auto &it : this->players) {
+        std::cout << it.second.id << std::endl;
+        // std::cout << it.second.id << ": " << (it.second.moving & 1) << (it.second.moving & 2) << (it.second.moving & 4) << (it.second.moving & 8) << std::endl;
         Player &player = it.second;
         float vx = 0;
         float vy = 0;
@@ -120,7 +124,7 @@ void Server::frame()
             vy += 1.f;
         }
         if (vx == 0 && vy == 0)
-            return;
+            continue;
 
         float norm = sqrt((vx * vx) + (vy * vy));
         vx = (vx / norm) * deltaTime;
@@ -130,10 +134,11 @@ void Server::frame()
     }
 }
 
-void Server::sendGameState(int connfd)
+void Server::sendGameState(int connfd, uint8_t movement)
 {
     try {
         Player &player = this->players.at(connfd);
+        player.moving = movement;
         std::set<int> unknownPlayers;
         for (auto &it : this->players)
         {
@@ -200,10 +205,10 @@ void Server::acceptClients()
 
     this->addPlayer(connfd);
 
-    Player &player = this->players.at(connfd);
+    uint8_t movement;
 
-    while (read(connfd, &player.moving, sizeof(uint8_t))) {
-        sendGameState(connfd);
+    while (read(connfd, &movement, sizeof(uint8_t))) {
+        sendGameState(connfd, movement);
     }
 
     std::cout << this->players.at(connfd).id << " disconnected" << std::endl;

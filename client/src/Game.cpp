@@ -120,7 +120,7 @@ void Game::updateMovement(sf::Keyboard::Key key, bool value)
 
 void Game::update()
 {
-    std::cout << (this->movement & 1) << (this->movement & 2) << (this->movement & 4) << (this->movement & 8) << std::endl;
+    // std::cout << (this->movement & 1) << (this->movement & 2) << (this->movement & 4) << (this->movement & 8) << std::endl;
     write(this->socketfd, &this->movement, sizeof(uint8_t));
 
     const sf::Color colors[] = {

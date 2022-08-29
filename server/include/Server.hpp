@@ -50,7 +50,7 @@ class Server
 
         void startClientThread();
 
-        void sendGameState(int connfd);
+        void sendGameState(int connfd, uint8_t movement);
 
         int socketFd;
         std::vector<std::thread> clientThreads;
