@@ -102,11 +102,7 @@ void Server::frame()
 {
     const float speed = 5;
     const float deltaTime = 1.f/60.f;
-    std::cout << "----------------------------------" << std::endl;
-    std::cout << "size: " << this->players.size() << std::endl;
     for (auto &it : this->players) {
-        std::cout << it.second.id << std::endl;
-        // std::cout << it.second.id << ": " << (it.second.moving & 1) << (it.second.moving & 2) << (it.second.moving & 4) << (it.second.moving & 8) << std::endl;
         Player &player = it.second;
         float vx = 0;
         float vy = 0;
