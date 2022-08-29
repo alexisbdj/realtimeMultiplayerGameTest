@@ -8,6 +8,7 @@ class Game
 {
     public:
         Game(const char * serverAddr);
+        ~Game();
         int run();
     private:
         void processEvent();
@@ -16,6 +17,8 @@ class Game
     
         sf::RenderWindow window;
         World world;
+
+        int socketfd;
 };
 
 #endif
