@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include <chrono>
 #include <algorithm>
+#include <cmath>
 #include "Server.hpp"
 
 Server::Server()
@@ -99,6 +100,34 @@ void Server::mainLoop()
 
 void Server::frame()
 {
+    const float speed = 5;
+    const float deltaTime = 1.f/60.f;
+    for (auto &it : this->players) {
+        Player &player = it.second;
+        float vx = 0;
+        float vy = 0;
+
+        if (player.moving & MOVING_LEFT_BIT) {
+            vx -= 1.f;
+        }
+        if (player.moving & MOVING_RIGHT_BIT) {
+            vx += 1.f;
+        }
+        if (player.moving & MOVING_TOP_BIT) {
+            vy -= 1.f;
+        }
+        if (player.moving & MOVING_BOTTOM_BIT) {
+            vy += 1.f;
+        }
+        if (vx == 0 && vy == 0)
+            return;
+
+        float norm = sqrt((vx * vx) + (vy * vy));
+        vx = (vx / norm) * deltaTime;
+        vy = (vy / norm) * deltaTime;
+        player.posx += vx;
+        player.posy += vy;
+    }
 }
 
 void Server::sendGameState(int connfd)
@@ -150,10 +179,11 @@ void Server::acceptClients()
 
     this->startClientThread();
 
-    char buf[255];
-
     this->addPlayer(connfd);
-    while (read(connfd, buf, 255)) {
+
+    Player &player = this->players.at(connfd);
+
+    while (read(connfd, &player.moving, sizeof(uint8_t))) {
         sendGameState(connfd);
     }
 

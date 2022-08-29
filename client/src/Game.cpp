@@ -6,6 +6,11 @@
 #include <unistd.h>
 #include "Game.hpp"
 
+#define MOVING_LEFT_BIT 1
+#define MOVING_RIGHT_BIT 2
+#define MOVING_TOP_BIT 4
+#define MOVING_BOTTOM_BIT 8
+
 struct PlayerAddPacket
 {
     int id;
@@ -22,7 +27,7 @@ struct PlayerStatePacket
 Game::Game(const char * serverAddr) : window(sf::VideoMode(1000, 800), "mmo de fou")
 {
     this->socketfd = socket(AF_INET, SOCK_STREAM, 0);
-
+    this->movement = 0;
     if (this->socketfd == -1) {
         switch (errno) {
             case EPROTONOSUPPORT:
@@ -77,12 +82,47 @@ void Game::processEvent()
         if (event.type == sf::Event::Closed) {
             window.close();
         }
+        else if (event.type == sf::Event::KeyPressed) {
+            updateMovement(event.key.code, true);
+        }
+        else if (event.type == sf::Event::KeyReleased) {
+            updateMovement(event.key.code, false);
+        }
+    }
+}
+
+void Game::updateMovement(sf::Keyboard::Key key, bool value)
+{
+    uint8_t bit = 0;
+    
+    if (key == sf::Keyboard::Q) {
+        bit = MOVING_LEFT_BIT;
+    }
+    else if (key == sf::Keyboard::D) {
+        bit = MOVING_RIGHT_BIT;
+    }
+    else if (key == sf::Keyboard::Z) {
+        bit = MOVING_TOP_BIT;
+    }
+    else if (key == sf::Keyboard::S) {
+        bit = MOVING_BOTTOM_BIT;
+    }
+    else {
+        return;
+    }
+    if (value) {
+        this->movement |= bit;
+    }
+    else {
+        this->movement &= (~bit);
     }
 }
 
 void Game::update()
 {
-    write(this->socketfd, "a", 1);
+    std::cout << (this->movement & 1) << (this->movement & 2) << (this->movement & 4) << (this->movement & 8) << std::endl;
+    write(this->socketfd, &this->movement, sizeof(uint8_t));
+
     const sf::Color colors[] = {
         sf::Color::Red,
         sf::Color::Cyan,
