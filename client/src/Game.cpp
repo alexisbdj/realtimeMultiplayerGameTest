@@ -148,6 +148,15 @@ void Game::update()
         read(this->socketfd, &statePacket, sizeof(statePacket));
         this->world.setPosition(statePacket.id, sf::Vector2f(statePacket.posx, statePacket.posy));
     }
+
+    size_t lostPlayers;
+    read(this->socketfd, &lostPlayers, sizeof(size_t));
+
+    for (size_t i = 0; i < lostPlayers; i++) {
+        int id;
+        read(this->socketfd, &id, sizeof(int));
+        this->world.removePlayer(id);
+    }
 }
 
 void Game::render()

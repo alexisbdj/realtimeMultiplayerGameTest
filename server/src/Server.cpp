@@ -158,6 +158,25 @@ void Server::sendGameState(int connfd)
             PlayerStatePacket packet = {it.second.id, it.second.posx, it.second.posy};
             write(connfd, &packet, sizeof(PlayerStatePacket));
         }
+
+        std::set<int> lostPlayers;
+
+        for (auto &it : player.knownPlayers) {
+            try {
+                this->getPlayerById(it);
+            }
+            catch (std::out_of_range &err) {
+                lostPlayers.insert(it);
+            }
+        }
+
+        
+        size = lostPlayers.size();
+
+        write(connfd, &size, sizeof(size_t));
+        for (auto &it : lostPlayers) {
+            write(connfd, &it, sizeof(int));
+        }
     }
     catch (std::out_of_range &err)
     {
